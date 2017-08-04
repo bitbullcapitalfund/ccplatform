@@ -2,7 +2,7 @@ There are two simple steps to follow: create a new strategy and running the trad
 
 
 A. Creating a new strategy.
-	1 - Create a class that inherits Strategy in the file "C://Codebase/data/core/models.py".
+	1 - Create a class that inherits Strategy in the file models.py.
 		Example:
 
 		class ToyStrategy(Strategy):
@@ -43,7 +43,7 @@ A. Creating a new strategy.
 
 
 B. Running the trading platform.
-	1 - Import your strategy into the file "C://Codebase/data/live_trader.py"
+	1 - Import your strategy into the file live_trader.py.
 		Example:
 
 		from core.models import ToyStrategy
