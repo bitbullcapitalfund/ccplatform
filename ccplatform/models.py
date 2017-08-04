@@ -50,7 +50,7 @@ class Strategy():
         """
         # Using only the match type messages.
         if msg['type'] == 'match':
-        
+
             # Parsing message.
             _type = 'bid' if msg['side'] == 'buy' else 'ask'
             price = float(msg['price'])
@@ -98,16 +98,20 @@ class DeviationStrategy(Strategy):
         # Entry logic.
         if self.accountState == 'CLOSE':
             # Mean calculations.
-            if (len(self.ask) >= self.period + 1) and (_type == 'sell'):
+            if (len(self.ask) > self.period) and (_type == 'ask'):
                 mean = np.mean(self.ask[-self.period:])
                 std = np.std(self.ask[-self.period:])
                 lowStd = mean - self.entryStd * std
                 print('Ask Std Dev: {} - {}'.format(lowStd, price))
                 if price < lowStd:
                     self.publish((_time, 'BUY', price))
+            elif (len(self.ask) < self.period) and (_type == 'ask'):
+                print("Collecting initial data: {}/{}".format(len(self.ask),
+                                                              self.period))
+                
         # Exit logic.
         elif self.accountState != 'CLOSE':
-            if (len(self.bid) >= self.period + 1) and (_type == 'buy'):
+            if (len(self.bid) >= self.period + 1) and (_type == 'bid'):
                 mean = np.mean(self.bid[-self.period:])
                 std = np.std(self.bid[-self.period:])
                 highStd = mean + self.exitStd * std

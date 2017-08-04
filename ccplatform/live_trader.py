@@ -22,9 +22,9 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-    key = 'c2c736241299f78327809504d2ffb0e7'
-    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
-    passphrase = 'si3b5hm7609'
+    key = ''
+    secret = ''
+    passphrase = ''
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
@@ -38,14 +38,14 @@ if __name__ == '__main__':
     
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
-    strategy = DeviationStrategy()
+    strategy = DeviationStrategy(period=10, entry_std=1, exit_std=1)
     feeder = GDAXFeeder()
     trader = RealTimeTrader(client, product=product, size=0.01)
     feeder.subscribe(strategy)
     strategy.subscribe(trader)
     
     # Backtest.
-#    feeder.start()
+    feeder.start()
 #    print('Connected and waiting for data')
     
     
