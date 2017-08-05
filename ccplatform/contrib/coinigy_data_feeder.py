@@ -14,6 +14,9 @@ from libraries.common import PubSubPattern
 
 
 class Channel(PubSubPattern):
+    """
+    This class only gives an interface to the different channels to publish the receiving messages.
+    """
     counter = 0
     
     def __init__(self, *args, **kwargs):
@@ -22,12 +25,13 @@ class Channel(PubSubPattern):
 
     def on_channel_message(self, key, message):
         self.publish(message)
-        print(message)
         self.__class__.counter += 1
-        print(self.__class__.counter)
 
 
 class CoinigyWebsocket():
+    """
+    Main class. Has all the websocket implementations.
+    """
     def __init__(self, key, secret, channels=[], reconnect=True):
         # Disabbling logging.
 #        logger = logging.getLogger()
@@ -43,7 +47,7 @@ class CoinigyWebsocket():
         self.socket.setreconnection(reconnect)
         self.channels = {}
         
-        # Composing different channels.
+        # Populates the channels dictionary with all the different channels instances as values.
         for c in channels:
             self.channels[c] = Channel()
             self.socket.onchannel(c, self.channels[c].on_channel_message)
@@ -88,6 +92,7 @@ if __name__ == "__main__":
     # Variables.
     key = "0ac92a25bd0e3744713ec4d22dda3bd2"
     secret = "9499f4c7b0b6b424d382872b70659f9a"
+    # List of channels that the websocket will subscribe to.
     channels=[
         'TRADE-BTCE--BTC--USD', 
         'TRADE-OK--BTC--CNY',
