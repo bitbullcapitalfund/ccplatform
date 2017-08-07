@@ -138,7 +138,7 @@ class MA30N5Strategy(Strategy):
         super().__init__()
         self.data = []
         self.normalised = np.array([])
-        self.model = k.models.load_model("models/categorical_model_v006.h5")
+        self.model = k.models.load_model("trained_models/categorical_model_v006.h5")
         
 
     def receive(self,msg):
@@ -151,12 +151,14 @@ class MA30N5Strategy(Strategy):
                 self.normalised = self.normalize_data()
             else:
                 self.data.append(_price)
-
-            self.calculate(_time,_price, _type)
+            
+            print(len(self.data))
+            self.prediction(_time,_price, _type)
+        
 
     def prediction(self, _time, price, _type):
         """
-        Return the signal BUY or CLOSE from the modeld. Injected Method.  
+        Return the signal BUY or CLOSE from the model. Injected Method.  
         :execute: publish method 
         """
         if len(self.normalised.shape) == 3:
@@ -164,8 +166,11 @@ class MA30N5Strategy(Strategy):
             result = "BUY" if np.argmax(prediction) == 1 else "CLOSE"
         else:
             result = "CLOSE"
-        print(result)
-        self.publish((_time, result, price))
+        
+        if (result == 'CLOSE') and (self.accountState == 'BUY'):
+            self.publish((_time, result, price))
+        if (result == 'BUY') and (self.accountState == 'CLOSE'):
+            self.publish((_time, result, price))
 
 
     def normalize_data(self):
@@ -185,7 +190,7 @@ class MA30N5Strategy(Strategy):
         :param json_string: String with information abour the price
         :return: match or done, Bid or Ask, price, Volume
         """
-        json_string = json_string.lower()
+        json_string = str(json_string).lower()
         json_string = json_string.replace("{","").replace("}","").replace("'","").replace(" ","")
         json_string = json_string.split(",")
         
@@ -195,7 +200,13 @@ class MA30N5Strategy(Strategy):
         _transaction = json_dict.get('type')
         _type = 'bid' if json_dict.get('side') == "buy" else 'ask'
         _time = dt.datetime.strptime(json_dict.get('time'), "%Y-%m-%dt%H:%M:%S.%fz").replace(microsecond=0)
-        _price = float(json_dict.get('price'))
-        _volume = float(json_dict.get('size'))
+        try:
+            _price = float(json_dict.get('price'))
+        except TypeError:
+            _price = 0
+        try:
+            _volume = float(json_dict.get('size'))
+        except TypeError:
+            _volume = 0
         
         return _transaction,_type,_time,_price,_volume

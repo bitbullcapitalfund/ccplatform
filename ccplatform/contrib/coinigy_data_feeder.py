@@ -8,34 +8,20 @@ Created on Wed Jul 26 20:54:30 2017
 import logging
 import json
 from socketclusterclient import Socketcluster
-
+from pub_sub import Publisher, Subscriber
+from websocket_thread import ConnectThread
 # Custom libraries.
-from libraries.common import PubSubPattern
-
-
-class Channel(PubSubPattern):
-    """
-    This class only gives an interface to the different channels to publish the receiving messages.
-    """
-    counter = 0
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.counter = 0
-
-    def on_channel_message(self, key, message):
-        self.publish(message)
-        self.__class__.counter += 1
-
+# from libraries.common import PubSubPattern
 
 class CoinigyWebsocket():
     """
     Main class. Has all the websocket implementations.
     """
+
     def __init__(self, key, secret, channels=[], reconnect=True):
         # Disabbling logging.
-#        logger = logging.getLogger()
-#        logger.disabled = True
+        logger = logging.getLogger()
+        logger.disabled = True
         
         # API credentials.
         self.api_credentials = json.loads('{}')
@@ -45,19 +31,36 @@ class CoinigyWebsocket():
         # Socket parameters.
         self.socket = Socketcluster.socket("wss://sc-02.coinigy.com/socketcluster/")
         self.socket.setreconnection(reconnect)
-        self.channels = {}
-        
+
+        self.pub = Publisher(channels)
         # Populates the channels dictionary with all the different channels instances as values.
         for c in channels:
-            self.channels[c] = Channel()
-            self.socket.onchannel(c, self.channels[c].on_channel_message)
+            channel = Subscriber(c)
+            self.pub.register(c, channel)
+            self.socket.onchannel(c, self.onChannelMessage)
         
         # Connecting to socket.
         self.socket.setBasicListener(self.onconnect, self.ondisconnect, 
                                      self.onConnectError)
         self.socket.setAuthenticationListener(self.onSetAuthentication, 
                                               self.onAuthentication)
-        
+    
+    def getChannels(self):
+        channels= []
+        for subscriber, callback in self.pub.get_subscribers().items():
+            channels.append[subscriber]
+        return channels
+
+    def unSubscribe(self,event, channel):
+        self.socket.unsubscribe(event)
+        self.pub.unregister(event,channel)
+
+
+    def subscribe(self,event, channel):
+        self.socket.subscribe(event)
+        self.pub.register(event, channel)
+        self.socket.onchannel(event, self.onChannelMessage)
+
     def connect(self):
         self.socket.connect()
     
@@ -80,10 +83,14 @@ class CoinigyWebsocket():
         socket.emitack("auth", self.api_credentials, self.ack)
     
     def ack(self, eventname, error, data):
-        for c in self.channels.keys():
-            print("Subscribing to channel: {}".format(c)) 
-            self.socket.subscribe(c)
+        for channelName,channel in self.pub.get_events().items():
+            print("Subscribing to channel: {}".format(channelName)) 
+            self.socket.subscribe(channelName)
 
+    def onChannelMessage(self,event, message):
+        self.pub.dispatch(event, message)
+
+        
     def print_message(self, key, error, message):
         print(message)
     
@@ -92,7 +99,6 @@ if __name__ == "__main__":
     # Variables.
     key = "0ac92a25bd0e3744713ec4d22dda3bd2"
     secret = "9499f4c7b0b6b424d382872b70659f9a"
-    # List of channels that the websocket will subscribe to.
     channels=[
         'TRADE-BTCE--BTC--USD', 
         'TRADE-OK--BTC--CNY',
@@ -103,10 +109,24 @@ if __name__ == "__main__":
         'TRADE-HUOB--BTC--CNY',
     ]
     
+    # pub = Publisher(channels)
+    # channel1 = Subscriber('channel1')
+    # channel2 = Subscriber('channel2')
+    # channel3 = Subscriber('channel3')
+
+    # pub.register("TRADE-BTCE--BTC--USD", channel1)
+    # pub.register("TRADE-BTRX--BTC--USDT", channel2)
+    # pub.register("TRADE-BTCE--BTC--USD", channel3)
+    # pub.register("TRADE-BTRX--BTC--USDT", channel3)
+
+    # pub.dispatch("TRADE-BTCE--BTC--USD", "It's USD!")
+    # pub.dispatch("TRADE-BTRX--BTC--USDT", "Its USDT")
     # Connecting to websocket.
     ws = CoinigyWebsocket(key, secret, channels=channels, reconnect=False)
-    ws.connect()
-    
+    connnectThread = ConnectThread(ws)
+    connnectThread.setDaemon(True)
+    connnectThread.start()
+    x=input("Press any key to exit")
 #    channels = ['TRADE-BTCE--BTC--EUR',
 # 'ORDER-BTCE--BTC--EUR',
 # 'TRADE-BTCE--BTC--RUR',

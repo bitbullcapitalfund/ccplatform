@@ -9,7 +9,7 @@ import sys
 import gdax
 
 from data_feeder import GDAXFeeder
-from models import DeviationStrategy
+from models import MA30N5Strategy
 from trader import RealTimeTrader    
 
 
@@ -22,9 +22,9 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-    key = ''
-    secret = ''
-    passphrase = ''
+    key = 'c2c736241299f78327809504d2ffb0e7 '
+    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
+    passphrase = 'si3b5hm7609'
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
-    strategy = DeviationStrategy(period=10, entry_std=1, exit_std=1)
+    strategy = MA30N5Strategy()
     feeder = GDAXFeeder()
     trader = RealTimeTrader(client, product=product, size=0.01)
     feeder.subscribe(strategy)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     
     # Backtest.
     feeder.start()
-#    print('Connected and waiting for data')
+    print('Connected and waiting for data')
     
     
     
