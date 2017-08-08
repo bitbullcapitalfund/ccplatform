@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import tensorflow.contrib.keras as k
-
+import tensorflow as tf
 
 class Strategy():
     """
@@ -138,7 +138,12 @@ class MA30N5Strategy(Strategy):
         super().__init__()
         self.data = []
         self.normalised = np.array([])
-        self.model = k.models.load_model("trained_models/categorical_model_v006.h5")
+        #self.model = k.models.load_model("trained_models/categorical_model_v006.h5")
+        #Setting the default graph to work properly
+        model_path = "trained_models/categorical_model_v006.h5"
+        self.model = k.models.load_model(model_path)
+        self.model._make_predict_function()
+        self.graph = tf.get_default_graph()
         
 
     def receive(self,msg):
@@ -162,7 +167,12 @@ class MA30N5Strategy(Strategy):
         :execute: publish method 
         """
         if len(self.normalised.shape) == 3:
-            prediction = self.model.predict(self.normalised)
+            #Set the default graph in order to work properly with threads
+            #ref - https://github.com/fchollet/keras/issues/2397
+            with self.graph.as_default():
+                prediction = self.model.predict(self.normalised)
+            print("prediction:",prediction)
+            #prediction = self.model.predict(self.normalised)
             result = "BUY" if np.argmax(prediction) == 1 else "CLOSE"
         else:
             result = "CLOSE"
