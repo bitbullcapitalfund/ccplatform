@@ -7,7 +7,6 @@ Created on Mon Jun 26 15:23:10 2017
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import seaborn as sns
 import numpy as np
 import sys
 import gdax

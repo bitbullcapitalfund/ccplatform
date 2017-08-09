@@ -97,8 +97,8 @@ class CoinigyWebsocket():
     
 if __name__ == "__main__":
     # Variables.
-    key = "0ac92a25bd0e3744713ec4d22dda3bd2"
-    secret = "9499f4c7b0b6b424d382872b70659f9a"
+    key = "67a4cf6b2800fb2a177693a61bff2b1a"
+    secret = "8f756b95e898a8e42bbed7b0abb858d5"
     channels=[
         'TRADE-BTCE--BTC--USD', 
         'TRADE-OK--BTC--CNY',

@@ -9,7 +9,7 @@ import sys
 import gdax
 
 from data_feeder import GDAXFeeder
-from models import MA30N5Strategy
+import models
 from trader import RealTimeTrader    
 
 
@@ -22,9 +22,9 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-    key = 'c2c736241299f78327809504d2ffb0e7 '
-    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
-    passphrase = 'si3b5hm7609'
+    key = ''
+    secret = ''
+    passphrase = ''
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
-    strategy = MA30N5Strategy()
+    strategy = models.DeviationStrategy(10, 1, 1)
     feeder = GDAXFeeder()
     trader = RealTimeTrader(client, product=product, size=0.01)
     feeder.subscribe(strategy)
