@@ -22,9 +22,9 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-    key = ''
-    secret = ''
-    passphrase = ''
+    key = 'c2c736241299f78327809504d2ffb0e7'
+    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
+    passphrase = 'si3b5hm7609'
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
