@@ -8,7 +8,7 @@ A. Creating a new strategy.
 		class ToyStrategy(Strategy):
 			pass
 
-	2- Implement the method calculate(). This method will be called each time a new trade is executed on the exchange. 
+	2- Override the method calculate(). This method will be called each time a new trade is executed on the exchange. 
 		Example:
 
 		class ToyStrategy(Strategy):
@@ -23,7 +23,7 @@ A. Creating a new strategy.
 				if float(price) >= 3000:
 					print(price)
 
-	4- Send signals to the exchange calling the send_signal() method a tuple with this format (time, type, price) as the only parameter.
+	4- Send signals to the exchange calling the send_signal(tuple) method. The tuple the send_signal method receives as the only parameter has this format (time, type, price).
 		Example:
 
 		class ToyStrategy(Strategy):
@@ -43,17 +43,12 @@ A. Creating a new strategy.
 
 
 B. Running the trading platform.
-	1 - Import your strategy into the file live_trader.py.
+	1 - Change line 41 of the script so it will instantiate your strategy.
 		Example:
 
-		from core.models import ToyStrategy
+		strategy = models.ToyStrategy()
 
-	2 - Change line 41 of the script so it will instantiate your strategy.
-		Example:
-
-		strategy = ToyStrategy()
-
-	3 - Run the script on the command line. Optionally you can change the currency you want to trade with.
+	2 - Run the script on the command line. Optionally you can change the currency you want to trade with.
 		Example:
 
 		C://Codebase/data> python live_trader.py BTC-USD
