@@ -1,15 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 29 15:42:36 2017
-
-@author: Paúl Herrera
-"""
-
 import numpy as np
 import pandas as pd
 import datetime as dt
-import tensorflow.contrib.keras as k
-import tensorflow as tf
+import pickle
 
 class Strategy():
     """
@@ -119,12 +111,6 @@ class DeviationStrategy(Strategy):
                 if (price > highStd) & (self.accountState == 'BUY'):
                     self.publish((_time, 'CLOSE', price))
         
-        
-class TestStrategy(Strategy):
-    def calculate(self, _time, price, _type):
-        print(_time, price, _type)
-        
-
 class MA30N5Strategy(Strategy):
     """
     Moving average Strategy. 
@@ -220,3 +206,78 @@ class MA30N5Strategy(Strategy):
             _volume = 0
         
         return _transaction,_type,_time,_price,_volume
+
+class BayesianStrategy(Strategy):
+    """
+    Strategy based on the bayesian regression. If the price change in the next tick is above buy_limit we buy.
+    If the price change in next tick is less than the sell_limit we sell. Else we hold the position.
+    """
+    def __init__(self, buy_limit = .01, sell_limit = -.01):
+        super().__init__()
+        self.data = []
+        self.basemodel1 = pickle.load(open("trained_models/base_model1.sav","rb")
+        self.basemodel2 = pickle.load(open("trained_models/base_model2.sav","rb")
+        self.basemodel3 = pickle.load(open("trained_models/base_model3.sav","rb")
+        self.mainmodel = pickle.load(open("trained_models/main_model.sav","rb")
+        self.buy_limit = buy_limit
+        self.sell_limit = sell_limit
+        
+
+    def receive(self,msg):
+        _transaction,_type,_time,_price,_volume = self.json_parse(msg)
+        
+        if _transaction == "match":            
+            if len(self.data) == 225:
+                self.prediction(_time, _price, _volume, _type)
+                self.data = self.data[1:]
+            else:
+                self.data.insert(0,_price)
+        
+
+    def prediction(self, _time, price, volume, _type):
+        """
+        Return the signal BUY or CLOSE from the model. Injected Method.  
+        :execute: publish method 
+        """
+        try:
+            pred1 = self.basemodel1.predict(np.array(self.data))
+            pred2 = self.basemodel2.predict(np.array(self.data[:128])) 
+            pred3 = self.basemodel3.predict(np.array(self.data[:64]))   
+            pred = self.mainmodel.predict(np.array([volume, price, pred1, pred2, pred3]))
+            if pred >= self.buy_limit:
+                result = 'BUY'
+            if pred <= self.sell_limit:
+                result = 'CLOSE'
+        except:
+            result = 'CLOSE'
+        
+        if ((result == 'CLOSE') and (self.accountState == 'BUY') and (_type == 'ask')) or ((result == 'BUY') and (self.accountState == 'CLOSE') and _type == 'bid'):
+            self.publish((_time, result, price))
+    
+    def json_parse(self,json_string):
+        """
+        Parse JSON string to a Dictionary. JSON String only represent one point in the time.
+        :param json_string: String with information abour the price
+        :return: match or done, Bid or Ask, time, price, Volume
+        """
+        json_string = str(json_string).lower()
+        json_string = json_string.replace("{","").replace("}","").replace("'","").replace(" ","")
+        json_string = json_string.split(",")
+        
+        json_data = np.array([ p.split(":",1) for p in json_string])
+        json_dict = {v[0]:v[1] for v in json_data}
+                
+        _transaction = json_dict.get('type')
+        _type = 'bid' if json_dict.get('side') == "buy" else 'ask'
+        _time = dt.datetime.strptime(json_dict.get('time'), "%Y-%m-%dt%H:%M:%S.%fz").replace(microsecond=0)
+        try:
+            _price = float(json_dict.get('price'))
+        except TypeError:
+            _price = 0
+        try:
+            _volume = float(json_dict.get('size'))
+        except TypeError:
+            _volume = 0
+        
+        return _transaction,_type,_time,_price,_volume
+
