@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import datetime as dt
+import tensorflow.contrib.keras as k
+import tensorflow as tf
 import pickle
 
 class Strategy():
