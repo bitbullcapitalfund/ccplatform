@@ -23,7 +23,7 @@ A. Creating a new strategy.
 				if float(price) >= 3000:
 					print(price)
 
-	4- Send signals to the exchange calling the send_signal(tuple) method. The tuple the send_signal method receives as the only parameter has this format (time, type, price).
+	4- Send signals to the exchange calling the publish(tuple) method. The tuple the send_signal method receives as the only parameter has this format (time, type, price).
 		Example:
 
 		class ToyStrategy(Strategy):

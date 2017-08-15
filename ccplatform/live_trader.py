@@ -25,6 +25,9 @@ if __name__ == '__main__':
     key = 'c2c736241299f78327809504d2ffb0e7'
     secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
     passphrase = 'si3b5hm7609'
+    key = '9116261f62d68797d0d81a58a7b52936'
+    secret = 'ccJBCbwaivcElWTA0g4n5pKmKCSpzYeE7Lac0cx4NuKfFn9BW0jOlZm76nLR3v90DmiUh4AjEp2vzw9uMeg49g=='
+    passphrase = 'znp4ddpgxmb'        
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
@@ -45,7 +48,7 @@ if __name__ == '__main__':
     strategy.subscribe(trader)
     
     # Backtest.
-    feeder.start()
+#    feeder.start()
     print('Connected and waiting for data')
     
     

@@ -6,17 +6,25 @@ Created on Thu Jul 20 17:12:38 2017
 """
 
 import pymongo
+import threading
+from common import Subscriber
 
-
-class MongoClient():
+class MyMongoClient(Subscriber):
     def __init__(self, db_name, collection_name, host='localhost', port=27017, *args, **kwargs):
+        super().__init__(name=db_name, *args, **kwargs)
         self._c = pymongo.MongoClient(host, port)
         self.set_database(db_name)
         self.set_collection(collection_name)
         
-    def receive(self, msg):
-        self.collection.insert_one(msg)
-        print(msg)
+    def insert_one(self, data):
+        print(type(data))
+        print(data)
+        self.collection.insert_one(data)
+        print('Inserted: \n{}'.format(data))
+        
+    def update(self, msg):
+        t = threading.Thread(target=self.insert_one, args=(msg,))
+        t.start()
         
     def set_collection(self, collection_name):
         self.collection = self.database[collection_name]

@@ -7,9 +7,10 @@ Created on Wed Jul 26 20:54:30 2017
 
 import logging
 import json
+
 from socketclusterclient import Socketcluster
-from pub_sub import Publisher, Subscriber
-from websocket_thread import ConnectThread
+from .pub_sub import Publisher, Subscriber
+from .websocket_thread import ConnectThread
 # Custom libraries.
 # from libraries.common import PubSubPattern
 

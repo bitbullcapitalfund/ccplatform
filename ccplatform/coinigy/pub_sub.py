@@ -1,9 +1,10 @@
 class Subscriber:
     def __init__(self, name):
         self.name = name
-    def update(self, message):
+    def update(self, message, verbose=False):
         # start new Thread in here to handle any task
-        print('\n\n {} got message "{}"'.format(self.name, message))
+        if verbose:
+            print('\n\n {} got message "{}"'.format(self.name, message))
         
 class Publisher:
     def __init__(self, events):
