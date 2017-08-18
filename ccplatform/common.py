@@ -8,8 +8,11 @@ import sys
 
 
 class Subscriber:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name=None):
+        if not name:
+            self.name = str(self.__class__).split(' ')[1].split("'")[1]
+        else:
+            self.name = name
     def update(self, message):
         # start new Thread in here to handle any task
         print('\n\n {} got message "{}"'.format(self.name, message))
@@ -28,11 +31,14 @@ class Publisher:
     def get_events(self):
         return self.events
                 
-    def register(self, event, channel):
-        self.get_subscribers(event)[channel] = channel.update
+    def register(self, event, subscriber):
+        self.get_subscribers(event)[subscriber] = subscriber.update
+        
+    def set_event(self, event):
+        self.events[event] = dict()
 
-    def unregister(self, event, channel):
-        del self.get_subscribers(event)[channel]
+    def unregister(self, event, subscriber):
+        del self.get_subscribers(event)[subscriber]
 
     def dispatch(self, event, message):
         for subscriber, callback in self.get_subscribers(event).items():

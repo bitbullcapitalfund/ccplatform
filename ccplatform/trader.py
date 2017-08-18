@@ -6,42 +6,14 @@ Created on Thu Jun 29 15:56:48 2017
 """
 
 import pandas as pd
+import gdax
 
-
-class Trader():
-    """
-    Abstract Base Class. A trader receives the signals from
-    the strategy.
-    """
-    def notify(self, msg):
-        raise NotImplementedError
-        
-    def publish(self, msg):
-        for s in self.subscribers:
-            s.receive(msg)        
-
-    def subscribe(self, subscriber):
-        self.subscribers.append(subscriber)
-
-
-class PaperTrader(Trader):
-    """
-    Saves the signals in a pandas dataframe.
-    """
-    def __init__(self):
-        super().__init__()
-        self._columns = ['time', 'type', 'price']
-        self.trades = pd.DataFrame(columns=self._columns)
-        self.subscribers = []
-        
-    
-    def notify(self, msg):
-        self.trades = pd.concat([self.trades, pd.DataFrame([msg], 
-                                              columns=self._columns)])
-        self.publish(msg)
+from common import Subscriber, Publisher
+from data_feeder import GDAXFeeder
+import models
                     
     
-class RealTimeTrader(Trader):
+class Trader(Subscriber):
     """
     Trades in real time through the gdax API.
     It takes a client object as first initialization parameter, so a
@@ -55,7 +27,7 @@ class RealTimeTrader(Trader):
         self.orderType = 'CLOSE'
         self.subscribers = []
         
-    def receive(self, msg):
+    def update(self, msg):
         print('\n\n')
         print(msg)
         print('\n\n')
@@ -83,6 +55,16 @@ class RealTimeTrader(Trader):
             elif self.orderType == 'SELL':
                 r = self.client.buy(price=msg[2], size=self.size, 
                                     product_id=self.product)
-        self.publish(msg)
+        
+        
+if __name__ == '__main__':
+    f = GDAXFeeder()
+    s = models.Strategy()
+    t = Trader(gdax.PublicClient())
+    
+    f.pub.register('gdax_data', s)
+    s.pub.register('signals', t)
+    
+    f.start()    
         
         

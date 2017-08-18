@@ -5,12 +5,18 @@ import tensorflow.contrib.keras as k
 import tensorflow as tf
 import pickle
 
-class Strategy():
+from common import Subscriber, Publisher
+from data_feeder import GDAXFeeder
+
+
+
+class Strategy(Subscriber):
     """
     Abstract Base Class for strategies.
     """
     def __init__(self):
-        self.subscribers = []
+        super().__init__()
+        self.pub = Publisher(['signals'])
         self.accountState = 'CLOSE'
         self.ask = [0]
         self.bid = [0]
@@ -36,9 +42,10 @@ class Strategy():
 
     
     def prediction(self, _time, price, _type):
-        raise NotImplementedError
+        self.pub.dispatch('signals', ( _time, price, _type))
         
-    def receive(self, msg):
+        
+    def update(self, msg):
         """
         Receives the msg and parses it.
         """
@@ -59,15 +66,6 @@ class Strategy():
             self.calculate(_time, price, _type)
         
         
-    def publish(self, signal):
-        for s in self.subscribers:
-            s.receive(signal)
-        self.accountState = signal[1]
-
-                
-    def subscribe(self, subscriber):
-        self.subscribers.append(subscriber)    
-
 
 class DeviationStrategy(Strategy):
     """
@@ -98,7 +96,7 @@ class DeviationStrategy(Strategy):
                 lowStd = mean - self.entryStd * std
                 print('Ask Std Dev: {} - {}'.format(lowStd, price))
                 if price < lowStd:
-                    self.publish((_time, 'BUY', price))
+                    self.pub.dispatch((_time, 'BUY', price))
             elif (len(self.ask) < self.period) and (_type == 'ask'):
                 print("Collecting initial data: {}/{}".format(len(self.ask),
                                                               self.period))
@@ -111,7 +109,7 @@ class DeviationStrategy(Strategy):
                 highStd = mean + self.exitStd * std
                 print('Bid Std Dev: {} - {}'.format(highStd, price))
                 if (price > highStd) & (self.accountState == 'BUY'):
-                    self.publish((_time, 'CLOSE', price))
+                    self.pub.dispatch((_time, 'CLOSE', price))
         
 class MA30N5Strategy(Strategy):
     """
@@ -134,7 +132,7 @@ class MA30N5Strategy(Strategy):
         self.graph = tf.get_default_graph()
         
 
-    def receive(self,msg):
+    def update(self,msg):
         _transaction,_type,_time,_price,_volume = self.json_parse(msg)
         
         if _transaction == "match":            
@@ -152,7 +150,7 @@ class MA30N5Strategy(Strategy):
     def prediction(self, _time, price, _type):
         """
         Return the signal BUY or CLOSE from the model. Injected Method.  
-        :execute: publish method 
+        :execute: pub.dispatch method 
         """
         if len(self.normalised.shape) == 3:
             #Set the default graph in order to work properly with threads
@@ -166,9 +164,9 @@ class MA30N5Strategy(Strategy):
             result = "CLOSE"
         
         if (result == 'CLOSE') and (self.accountState == 'BUY'):
-            self.publish((_time, result, price))
+            self.pub.dispatch((_time, result, price))
         if (result == 'BUY') and (self.accountState == 'CLOSE'):
-            self.publish((_time, result, price))
+            self.pub.dispatch((_time, result, price))
 
 
     def normalize_data(self):
@@ -209,6 +207,7 @@ class MA30N5Strategy(Strategy):
         
         return _transaction,_type,_time,_price,_volume
 
+
 class BayesianStrategy(Strategy):
     """
     Strategy based on the bayesian regression. If the price change in the next tick is above buy_limit we buy.
@@ -217,15 +216,15 @@ class BayesianStrategy(Strategy):
     def __init__(self, buy_limit = .01, sell_limit = -.01):
         super().__init__()
         self.data = []
-        self.basemodel1 = pickle.load(open("trained_models/base_model1.sav","rb")
-        self.basemodel2 = pickle.load(open("trained_models/base_model2.sav","rb")
-        self.basemodel3 = pickle.load(open("trained_models/base_model3.sav","rb")
-        self.mainmodel = pickle.load(open("trained_models/main_model.sav","rb")
+        self.basemodel1 = pickle.load(open("trained_models/base_model1.sav","rb"))
+        self.basemodel2 = pickle.load(open("trained_models/base_model2.sav","rb"))
+        self.basemodel3 = pickle.load(open("trained_models/base_model3.sav","rb"))
+        self.mainmodel = pickle.load(open("trained_models/main_model.sav","rb"))
         self.buy_limit = buy_limit
         self.sell_limit = sell_limit
         
 
-    def receive(self,msg):
+    def update(self,msg):
         _transaction,_type,_time,_price,_volume = self.json_parse(msg)
         
         if _transaction == "match":            
@@ -239,7 +238,7 @@ class BayesianStrategy(Strategy):
     def prediction(self, _time, price, volume, _type):
         """
         Return the signal BUY or CLOSE from the model. Injected Method.  
-        :execute: publish method 
+        :execute: pub.dispatch method 
         """
         try:
             pred1 = self.basemodel1.predict(np.array(self.data))
@@ -254,7 +253,7 @@ class BayesianStrategy(Strategy):
             result = 'CLOSE'
         
         if ((result == 'CLOSE') and (self.accountState == 'BUY') and (_type == 'ask')) or ((result == 'BUY') and (self.accountState == 'CLOSE') and _type == 'bid'):
-            self.publish((_time, result, price))
+            self.pub.dispatch((_time, result, price))
     
     def json_parse(self,json_string):
         """
@@ -283,3 +282,13 @@ class BayesianStrategy(Strategy):
         
         return _transaction,_type,_time,_price,_volume
 
+
+if __name__ == '__main__':
+    f = GDAXFeeder()
+    s = Strategy()
+    
+    f.pub.register('gdax_data', s)
+    
+    f.start()    
+    
+    

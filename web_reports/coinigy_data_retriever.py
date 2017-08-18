@@ -23,16 +23,24 @@ from account import CoinigyAccount
 def get_balances():
     return json.loads(account.call('balances').text)
 
+
 if __name__ == "__main__":
     # Variables.
     db_name = 'cc_data'
     time_between_calls = dt.timedelta(seconds=get_arg(1, 300))
     key = os.environ['LANDON-BITTREX-KEY']
     secret = os.environ['LANDON-BITTREX-SECRET']
+    try:
+        db_user = 'Writeuser'
+        db_password = os.environ['MONGO-WRITE-PASSWORD']
+        host = 'mongodb://{}:{}@127.0.0.1'.format(db_user, db_password)
+    except KeyError:
+        host = 'localhost'
     
     # Component initialization.
     account = CoinigyAccount(key, secret)
-    db = MyMongoClient(db_name, collection_name='coinigy_account')
+    db = MyMongoClient(db_name, collection_name='coinigy_account',
+                       host=host)
     
     # Time setting.
     next_call = dt.datetime.now()

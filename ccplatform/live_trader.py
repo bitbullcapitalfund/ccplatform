@@ -6,11 +6,13 @@ Created on Mon Jun 26 15:23:10 2017
 """
 
 import sys
+import os
 import gdax
 
 from data_feeder import GDAXFeeder
 import models
-from trader import RealTimeTrader    
+from trader import RealTimeTrader
+from mongo_handler import MyMongoClient 
 
 
 def get_arg(index, default):
@@ -38,14 +40,27 @@ if __name__ == '__main__':
   
     # Setting client and data.
 #    data = pd.read_csv('BTC-USD_20170619-20170626.csv', index_col=0)
+
     
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
     strategy = models.DeviationStrategy(10, 1, 1)
     feeder = GDAXFeeder()
     trader = RealTimeTrader(client, product=product, size=0.01)
+    
+    # Initializing database.
+    try:
+        db_user = 'Writeuser'
+        db_password = os.environ['MONGO-WRITE-PASSWORD']
+        host = 'mongodb://{}:{}@127.0.0.1'.format(db_user, db_password)
+    except KeyError:
+        host = 'localhost'
+    db = MyMongoClient('cc_trades', strategy.name, host=host)
+    
+    # Subscribing.
     feeder.subscribe(strategy)
     strategy.subscribe(trader)
+    strategy.subscribe(db)
     
     # Backtest.
 #    feeder.start()

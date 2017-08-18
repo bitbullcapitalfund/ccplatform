@@ -12,6 +12,8 @@ import time
 import threading
 from tqdm import tqdm
 
+from common import Publisher
+
 
 
 class DataFeeder():
@@ -19,10 +21,9 @@ class DataFeeder():
     Abstract Base Class. The DataFeeder provides the data 
     to the strategy in an event-driven way.
     """
-    def __init__(self):
-        super().__init__()
-        self.subscribers = []
-
+    def __init__(self, events=['new_data'], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pub = Publisher(events)
         
     @classmethod
     def append_data(cls, client, df, product, columns, start_timestamp, 
@@ -80,25 +81,7 @@ class DataFeeder():
         data = data.where(data.close != data.close.shift()).dropna().sort_index()
         
         return data
-    
-    def publish(self, msg):
-        for s in self.subscribers:
-            s.receive(msg)
-        
-    def subscribe(self, subscriber):
-        self.subscribers.append(subscriber)
-    
-    
-
-class HistoricalDataFeeder(DataFeeder):
-    """
-    Data feeder for backtesting purposes.
-    It uses historical data prices to feed a strategy.
-    """
-    def feed(self, data):
-        for t, p in tqdm(zip(data.index, data.open.values)):
-            self.strategy.calculate(t, p, 'BID')
-        
+            
         
 
 class GDAXFeeder(DataFeeder, gdax.WebsocketClient):
@@ -109,21 +92,21 @@ class GDAXFeeder(DataFeeder, gdax.WebsocketClient):
     """
     def __init__(self, product='BTC-USD', *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pub.set_event('gdax_data')
         self.products = [product]
         
     def on_open(self):
         self.url = "wss://ws-feed.gdax.com/"
         
     def on_message(self, msg):
-        self.publish(msg)
+        self.pub.dispatch('gdax_data', msg)
 
 
 class GDAXTradingFeeder(GDAXFeeder):
     def on_message(self, msg):
         if msg["type"] == 'match':
-            self.publish(msg)
-        
-        
+            self.pub.dispatch('gdax_data', msg)
+            print(msg)
         
         
 class TestFeeder(DataFeeder, gdax.WebsocketClient):
@@ -172,6 +155,6 @@ class AllMesages(gdax.WebsocketClient):
         
         
 if __name__ == "__main__":
-    f = AllMesages()
+    f = GDAXFeeder()
     f.start()
     
