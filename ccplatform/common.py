@@ -4,6 +4,9 @@ Created on Thu Jul 27 12:27:21 2017
 
 @author: Paúl Herrera
 """
+import sys
+
+
 class Subscriber:
     def __init__(self, name):
         self.name = name
@@ -51,6 +54,15 @@ class PubSubPattern():
     def subscribe(self, subscriber):
         self.subscribers.append(subscriber)
     
-    
+
+
+def get_arg(index, default=None):
+    """
+    Grabs a value from the command line or returns the default one.
+    """
+    try:
+        return sys.argv[index]
+    except IndexError:
+        return default
             
     

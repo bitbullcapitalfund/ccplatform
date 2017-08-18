@@ -7,7 +7,7 @@ Created on Thu Jul 20 17:12:38 2017
 
 import pymongo
 import threading
-from common import Subscriber
+from .common import Subscriber
 
 class MyMongoClient(Subscriber):
     def __init__(self, db_name, collection_name, host='localhost', port=27017, *args, **kwargs):
@@ -17,8 +17,6 @@ class MyMongoClient(Subscriber):
         self.set_collection(collection_name)
         
     def insert_one(self, data):
-        print(type(data))
-        print(data)
         self.collection.insert_one(data)
         print('Inserted: \n{}'.format(data))
         
