@@ -11,7 +11,7 @@ import gdax
 
 from data_feeder import GDAXFeeder
 import models
-from trader import RealTimeTrader
+from trader import Trader
 from mongo_handler import MyMongoClient 
 
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     client = gdax.AuthenticatedClient(key, secret, passphrase)
     strategy = models.DeviationStrategy(10, 1, 1)
     feeder = GDAXFeeder()
-    trader = RealTimeTrader(client, product=product, size=0.01)
+    trader = Trader(client, product=product, size=0.01)
     
     # Initializing database.
     try:
@@ -58,9 +58,9 @@ if __name__ == '__main__':
     db = MyMongoClient('cc_trades', strategy.name, host=host)
     
     # Subscribing.
-    feeder.subscribe(strategy)
-    strategy.subscribe(trader)
-    strategy.subscribe(db)
+    feeder.pub.register('gdax_data', strategy)
+    strategy.pub.register('signals', trader)
+    strategy.pub.register('signals', db)
     
     # Backtest.
 #    feeder.start()

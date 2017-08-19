@@ -7,7 +7,7 @@ Created on Thu Jul 20 17:12:38 2017
 
 import pymongo
 import threading
-from .common import Subscriber
+from common import Subscriber
 
 class MyMongoClient(Subscriber):
     def __init__(self, db_name, collection_name, host='localhost', port=27017, *args, **kwargs):
