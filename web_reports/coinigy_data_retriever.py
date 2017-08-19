@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Wed Aug 16 07:38:26 2017
@@ -27,9 +28,11 @@ def get_balances():
 if __name__ == "__main__":
     # Variables.
     db_name = 'cc_data'
-    time_between_calls = dt.timedelta(seconds=get_arg(1, 300))
-    key = os.environ['LANDON-BITTREX-KEY']
-    secret = os.environ['LANDON-BITTREX-SECRET']
+    trader = get_arg(1, 'LANDON') #'LANDON', 'CHRISTIAN' OR 'VIVEK.
+    time_between_calls = dt.timedelta(seconds=get_arg(2, 300))
+    key = os.environ['{}-BITTREX-KEY'.format(trader)]
+    secret = os.environ['{}-BITTREX-SECRET'.format(trader)]
+    collection = '{}_coinigy_account'.format(trader)
     try:
         db_user = 'Writeuser'
         db_password = os.environ['MONGO-WRITE-PASSWORD']
@@ -39,7 +42,7 @@ if __name__ == "__main__":
     
     # Component initialization.
     account = CoinigyAccount(key, secret)
-    db = MyMongoClient(db_name, collection_name='coinigy_account',
+    db = MyMongoClient(db_name, collection_name=collection,
                        host=host)
     
     # Time setting.
