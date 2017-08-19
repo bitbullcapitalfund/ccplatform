@@ -6,8 +6,9 @@ Created on Thu Jul 20 16:24:22 2017
 """
 
 import sys
-from core.data_feeder import RealTimeFeeder
-from core.mongo_handler import MongoClient
+import os
+from data_feeder import GDAXFeeder
+from mongo_handler import MyMongoClient
 
 
 
@@ -24,14 +25,19 @@ if __name__ == '__main__':
     secret = ''
     passphrase = ''
     product = get_arg(1, 'BTC-USD')
-    db_name = get_arg(2, 'gdax')
-    collection_name = get_arg(3, 'BTCUSD')
+    collection_name = 'gdax_' + product
       
     # Initializing objects.
 #    client = gdax.AuthenticatedClient(key, secret, passphrase)
-    feeder = RealTimeFeeder()
-    db = MongoClient(db_name, collection_name)
-    feeder.subscribe(db)   
+    feeder = GDAXFeeder()
+    try:
+        db_user = 'Writeuser'
+        db_password = os.environ['MONGO-WRITE-PASSWORD']
+        host = 'mongodb://{}:{}@127.0.0.1'.format(db_user, db_password)
+    except KeyError:
+        host = 'localhost'
+    db = MyMongoClient('cc_data', collection_name, host=host)
+    feeder.pub.register('gdax_data', db)
     
     # Trade.
     feeder.start()

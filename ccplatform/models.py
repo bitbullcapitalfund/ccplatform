@@ -233,6 +233,7 @@ class BayesianStrategy(Strategy):
                 self.data = self.data[1:]
             else:
                 self.data.insert(0,_price)
+                print('Inserting new data')
         
 
     def prediction(self, _time, price, volume, _type):
@@ -240,6 +241,7 @@ class BayesianStrategy(Strategy):
         Return the signal BUY or CLOSE from the model. Injected Method.  
         :execute: pub.dispatch method 
         """
+        print('Predicting...')
         try:
             pred1 = self.basemodel1.predict(np.array(self.data))
             pred2 = self.basemodel2.predict(np.array(self.data[:128])) 
@@ -253,6 +255,7 @@ class BayesianStrategy(Strategy):
             result = 'CLOSE'
         
         if ((result == 'CLOSE') and (self.accountState == 'BUY') and (_type == 'ask')) or ((result == 'BUY') and (self.accountState == 'CLOSE') and _type == 'bid'):
+            print('\n\nPlacing a trade\n\n')
             self.pub.dispatch((_time, result, price))
     
     def json_parse(self,json_string):

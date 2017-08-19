@@ -24,9 +24,9 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-    key = 'c2c736241299f78327809504d2ffb0e7'
-    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
-    passphrase = 'si3b5hm7609'
+#    key = 'c2c736241299f78327809504d2ffb0e7'
+#    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
+#    passphrase = 'si3b5hm7609'
     key = '9116261f62d68797d0d81a58a7b52936'
     secret = 'ccJBCbwaivcElWTA0g4n5pKmKCSpzYeE7Lac0cx4NuKfFn9BW0jOlZm76nLR3v90DmiUh4AjEp2vzw9uMeg49g=='
     passphrase = 'znp4ddpgxmb'        
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
-    strategy = models.DeviationStrategy(10, 1, 1)
+    strategy = models.BayesianStrategy()
     feeder = GDAXFeeder()
     trader = Trader(client, product=product, size=0.01)
     
