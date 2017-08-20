@@ -4,6 +4,7 @@ import datetime as dt
 import tensorflow.contrib.keras as k
 import tensorflow as tf
 import pickle
+from sklearn.externals import joblib
 
 from common import Subscriber, Publisher
 from data_feeder import GDAXFeeder
@@ -216,10 +217,10 @@ class BayesianStrategy(Strategy):
     def __init__(self, buy_limit = .01, sell_limit = -.01):
         super().__init__()
         self.data = []
-        self.basemodel1 = pickle.load(open("trained_models/base_model1.sav","rb"))
-        self.basemodel2 = pickle.load(open("trained_models/base_model2.sav","rb"))
-        self.basemodel3 = pickle.load(open("trained_models/base_model3.sav","rb"))
-        self.mainmodel = pickle.load(open("trained_models/main_model.sav","rb"))
+        self.basemodel1 = joblib.load("trained_models/base_model1.pkl")
+        self.basemodel2 = joblib.load("trained_models/base_model2.pkl")
+        self.basemodel3 = joblib.load("trained_models/base_model3.pkl")
+        self.mainmodel = joblib.load("trained_models/main_model.pkl")
         self.buy_limit = buy_limit
         self.sell_limit = sell_limit
         
