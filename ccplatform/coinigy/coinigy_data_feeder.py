@@ -5,14 +5,18 @@ Created on Wed Jul 26 20:54:30 2017
 @author: Paúl Herrera
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+
 import logging
 import json
 
 from socketclusterclient import Socketcluster
-from .pub_sub import Publisher, Subscriber
-from .websocket_thread import ConnectThread
-# Custom libraries.
-# from libraries.common import PubSubPattern
+from ccplatform.coinigy.pub_sub import Publisher, Subscriber
+from ccplatform.coinigy.websocket_thread import ConnectThread
+
+
 
 class CoinigyWebsocket():
     """
@@ -84,9 +88,18 @@ class CoinigyWebsocket():
         socket.emitack("auth", self.api_credentials, self.ack)
     
     def ack(self, eventname, error, data):
+        if not error:
+            print('User succesfully autenticated')
+        else:
+            print('Error in authentication')
+        # Subscribing for the exchanges channels.
         for channelName,channel in self.pub.get_events().items():
             print("Subscribing to channel: {}".format(channelName)) 
-            self.socket.subscribe(channelName)
+            self.socket.subscribeack(channelName, self.subscribedack)
+            
+    def subscribedack(self, eventname, error, data):
+        if not error:
+            print('Succesfully subscribed to channel {}'.format(eventname))
 
     def onChannelMessage(self,event, message):
         self.pub.dispatch(event, message)
@@ -98,8 +111,8 @@ class CoinigyWebsocket():
     
 if __name__ == "__main__":
     # Variables.
-    key = "67a4cf6b2800fb2a177693a61bff2b1a"
-    secret = "8f756b95e898a8e42bbed7b0abb858d5"
+    key = "7f30437f1a03e032b6d6b606db087024"
+    secret = "8a412962096a60e2685e5058ebe76e4a"
     channels=[
         'TRADE-BTCE--BTC--USD', 
         'TRADE-OK--BTC--CNY',

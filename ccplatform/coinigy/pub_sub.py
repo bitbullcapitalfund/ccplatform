@@ -1,7 +1,7 @@
 class Subscriber:
     def __init__(self, name):
         self.name = name
-    def update(self, message, verbose=False):
+    def update(self, message, verbose=True):
         # start new Thread in here to handle any task
         if verbose:
             print('\n\n {} got message "{}"'.format(self.name, message))
