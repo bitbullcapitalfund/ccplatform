@@ -114,17 +114,17 @@ if __name__ == "__main__":
     key = "7f30437f1a03e032b6d6b606db087024"
     secret = "8a412962096a60e2685e5058ebe76e4a"
     channels=[
-        'TRADE-BTCE--BTC--USD', 
-        'TRADE-OK--BTC--CNY',
-        'TRADE-BITF--BTC--USD',
+#        'TRADE-BTCE--BTC--USD', 
+#        'TRADE-OK--BTC--CNY',
+#        'TRADE-BITF--BTC--USD',
         'TRADE-GDAX--BTC--USD',
-        'TRADE-PLNX--USDT--BTC',
-        'TRADE-BTRX--BTC--USDT',
-        'TRADE-HUOB--BTC--CNY',
+#        'TRADE-PLNX--USDT--BTC',
+#        'TRADE-BTRX--BTC--USDT',
+#        'TRADE-HUOB--BTC--CNY',
     ]
     
     # Connecting to websocket.
-    ws = CoinigyWebsocket(key, secret, channels=channels, reconnect=False)
+    ws = CoinigyWebsocket(key, secret, channels=channels, reconnect=True)
     connnectThread = ConnectThread(ws)
     connnectThread.setDaemon(True)
     connnectThread.start()
