@@ -225,7 +225,7 @@ class BayesianStrategy(Strategy):
         self.params = pickle.load(open("trained_models/params_regression1.pkl",'rb'))
         self.buy_limit = self.params['buy_limit']
         self.sell_limit = self.params['sell_limit']
-        self.lag = len(self.regression_model.feature_importances_)
+#        self.lag = len(self.regression_model.feature_importances_)
 
     def update(self,msg):
         _transaction,_type,_time,_price,_volume = self.json_parse(msg)
@@ -292,10 +292,10 @@ class BayesianStrategy(Strategy):
 
 if __name__ == '__main__':
     f = GDAXFeeder()
-    s = Strategy()
+    s = BayesianStrategy()
     
     f.pub.register('gdax_data', s)
     
-    f.start()    
+#    f.start()    
     
     

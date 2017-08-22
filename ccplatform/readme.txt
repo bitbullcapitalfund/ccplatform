@@ -1,4 +1,6 @@
-There are two simple steps to follow: create a new strategy and running the trading platform.
+Integrating a trading model to the platform.
+
+There are two steps to follow: create a new strategy and running the trading platform.
 
 
 A. Creating a new strategy.
@@ -12,10 +14,10 @@ A. Creating a new strategy.
 		Example:
 
 		class ToyStrategy(Strategy):
-			def calculate(self, _time, price, _type): 	# Always use these parameters.
+			def calculate(self, _time, price, _type): 	
 				pass
 
-	3- Use the parameters '_time', 'price', and '_type' to calculate the trading logic. '_time' is a datetime object, price is a float with the last price traded, and '_type' will be a string containing 'bid' or 'ask'.
+	3- Calculate receives the parameters '_time', 'price', and '_type' to calculate the trading logic. '_time' is a datetime object, price is a float with the last price traded, and '_type' will be a string containing 'bid' or 'ask'.
 		Example:
 
 		class ToyStrategy(Strategy):
@@ -23,15 +25,15 @@ A. Creating a new strategy.
 				if float(price) >= 3000:
 					print(price)
 
-	4- Send signals to the exchange calling the publish(tuple) method. The tuple the send_signal method receives as the only parameter has this format (time, type, price).
+	4- Send signals to the exchange calling the self.pub.dispatch() method. This method receives a tuple that has this format (time, type, price). 'time' is a datetime object, type is a string containin 'BUY' or 'CLOSE' and price is a string containing the desired price of the order.
 		Example:
 
 		class ToyStrategy(Strategy):
 			def calculate(self, _time, price, _type): 	
 				if float(price) >= 3000:
-					self.send_signal((_time, 'BUY', 3000.00))
+					self.pub.dispatch((_time, 'BUY', 3000.00))
 
-	5- You can check the attribute 'accountState' to know if you are in or out of the market. This attribute can have to states: 'CLOSE' (out of the market) or 'BUY' (in the market).
+	5- You can check the attribute 'self.accountState' to know if you are in or out of the market. This attribute can have two states: 'CLOSE' (out of the market) or 'BUY' (in the market).
 		Example:
 
 		class ToyStrategy(Strategy):
@@ -43,7 +45,7 @@ A. Creating a new strategy.
 
 
 B. Running the trading platform.
-	1 - Change line 41 of the script so it will instantiate your strategy.
+	1 - Change line 47 of the ./ccplatform/live_trader.py script so it will instantiate your strategy.
 		Example:
 
 		strategy = models.ToyStrategy()
