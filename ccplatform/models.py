@@ -214,22 +214,24 @@ class BayesianStrategy(Strategy):
     Strategy based on the bayesian regression. If the price change in the next tick is above buy_limit we buy.
     If the price change in next tick is less than the sell_limit we sell. Else we hold the position.
     """
-    def __init__(self, buy_limit = .01, sell_limit = -.01):
+    def __init__(self):
         super().__init__()
         self.data = []
-        self.basemodel1 = joblib.load("trained_models/base_model1.pkl")
-        self.basemodel2 = joblib.load("trained_models/base_model2.pkl")
-        self.basemodel3 = joblib.load("trained_models/base_model3.pkl")
-        self.mainmodel = joblib.load("trained_models/main_model.pkl")
-        self.buy_limit = buy_limit
-        self.sell_limit = sell_limit
-        
+        #self.basemodel1 = joblib.load("trained_models/base_model1.pkl")
+        #self.basemodel2 = joblib.load("trained_models/base_model2.pkl")
+        #self.basemodel3 = joblib.load("trained_models/base_model3.pkl")
+        #self.mainmodel = joblib.load("trained_models/main_model.pkl")
+        self.regression_model = joblib.load("trained_models/regression_model1.pkl")
+        self.params = pickle.load(open("trained_models/params_regression1.pkl",'rb'))
+        self.buy_limit = self.params['buy_limit']
+        self.sell_limit = self.params['sell_limit']
+        self.lag = len(self.regression_model.feature_importances_)
 
     def update(self,msg):
         _transaction,_type,_time,_price,_volume = self.json_parse(msg)
         
         if _transaction == "match":            
-            if len(self.data) == 225:
+            if len(self.data) == self.lag:
                 self.prediction(_time, _price, _volume, _type)
                 self.data = self.data[1:]
             else:
@@ -244,10 +246,11 @@ class BayesianStrategy(Strategy):
         """
         print('Predicting...')
         try:
-            pred1 = self.basemodel1.predict(np.array(self.data))
-            pred2 = self.basemodel2.predict(np.array(self.data[:128])) 
-            pred3 = self.basemodel3.predict(np.array(self.data[:64]))   
-            pred = self.mainmodel.predict(np.array([volume, price, pred1, pred2, pred3]))
+            #pred1 = self.basemodel1.predict(np.array(self.data))
+            #pred2 = self.basemodel2.predict(np.array(self.data[:128])) 
+            #pred3 = self.basemodel3.predict(np.array(self.data[:64]))   
+            #pred = self.mainmodel.predict(np.array([volume, price, pred1, pred2, pred3]))
+            pred = self.regression_model.predict(self.data)
             if pred >= self.buy_limit:
                 result = 'BUY'
             if pred <= self.sell_limit:
