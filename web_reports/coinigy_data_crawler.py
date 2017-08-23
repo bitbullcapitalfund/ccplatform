@@ -22,7 +22,7 @@ def get_arg(index, default):
 
 
 if __name__ == "__main__":
-	# Variables.
+    # Variables.
     key = "1a0ffafcbaff2886c8212180bedcd49b"
     secret = "700320ef659ac9bf39e89202fce9ad12"
     channel = get_arg(1, '4AE7D052-0F85-C19E-09E1-4190EF8775CC')
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Setting database and subscriptions.
     db = MyMongoClient(db_name='coinigy_account_data', collection_name=channel)
     ws.pub.register(channel, db)
-        
+
     # Start connection.
     connnectThread.start()
     print('\nWaiting for connection')

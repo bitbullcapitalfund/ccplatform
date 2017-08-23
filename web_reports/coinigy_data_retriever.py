@@ -28,7 +28,7 @@ def get_balances():
 if __name__ == "__main__":
     # Variables.
     db_name = 'cc_data'
-    trader = get_arg(1, 'LANDON') #'LANDON', 'CHRISTIAN' OR 'VIVEK.
+    trader = get_arg(1, 'LANDON')  # 'LANDON', 'CHRISTIAN' OR 'VIVEK.
     time_between_calls = dt.timedelta(seconds=get_arg(2, 300))
     key = os.environ['{}-BITTREX-KEY'.format(trader)]
     secret = os.environ['{}-BITTREX-SECRET'.format(trader)]
@@ -39,15 +39,15 @@ if __name__ == "__main__":
         host = 'mongodb://{}:{}@127.0.0.1'.format(db_user, db_password)
     except KeyError:
         host = 'localhost'
-    
+
     # Component initialization.
     account = CoinigyAccount(key, secret)
     db = MyMongoClient(db_name, collection_name=collection,
                        host=host)
-    
+
     # Time setting.
     next_call = dt.datetime.now()
-    
+
     # Main loop.
     while True:
         now = dt.datetime.now()
@@ -64,11 +64,8 @@ if __name__ == "__main__":
                 sleep(600)
                 continue
             data = data['data']
-            # Inserts each coin as a document in the DB.    
+            # Inserts each coin as a document in the DB.
             for d in data:
                 d['time'] = now
                 db.insert_one(d)
             next_call = now + time_between_calls
-        
-    
-    

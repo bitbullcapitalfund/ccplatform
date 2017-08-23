@@ -4,15 +4,14 @@ Created on Thu Jun 29 15:56:48 2017
 
 @author: Paúl Herrera
 """
-
 import pandas as pd
 import gdax
+import models
 
 from common import Subscriber, Publisher
 from data_feeder import GDAXFeeder
-import models
-                    
-    
+
+
 class Trader(Subscriber):
     """
     Trades in real time through the gdax API.
@@ -26,14 +25,12 @@ class Trader(Subscriber):
         self.orderId = 0
         self.orderType = 'CLOSE'
         self.subscribers = []
-        
+
     def update(self, msg):
-        print('\n\n')
-        print(msg)
-        print('\n\n')
-        
+        print('\n\n', msg, '\n\n')
+
         if msg[1] == 'BUY':
-            r = self.client.buy(price=msg[2], size=self.size, 
+            r = self.client.buy(price=msg[2], size=self.size,
                                 product_id=self.product)
             try:
                 self.orderId = r['id']
@@ -41,7 +38,7 @@ class Trader(Subscriber):
                 print(r)
             self.orderType = 'BUY'
         elif msg[1] == 'SELL':
-            r = self.client.sell(price=msg[2], size=self.size, 
+            r = self.client.sell(price=msg[2], size=self.size,
                                  product_id=self.product)
             try:
                 self.orderId = r['id']
@@ -50,21 +47,19 @@ class Trader(Subscriber):
             self.orderType = 'SELL'
         elif msg[1] == 'CLOSE':
             if self.orderType == 'BUY':
-                r = self.client.sell(price=msg[2], size=self.size, 
+                r = self.client.sell(price=msg[2], size=self.size,
                                      product_id=self.product)
             elif self.orderType == 'SELL':
-                r = self.client.buy(price=msg[2], size=self.size, 
+                r = self.client.buy(price=msg[2], size=self.size,
                                     product_id=self.product)
-        
-        
+
+
 if __name__ == '__main__':
     f = GDAXFeeder()
     s = models.Strategy()
     t = Trader(gdax.PublicClient())
-    
+
     f.pub.register('gdax_data', s)
     s.pub.register('signals', t)
-    
-    f.start()    
-        
-        
+
+    f.start()

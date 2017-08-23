@@ -13,27 +13,28 @@ class Subscriber:
             self.name = str(self.__class__).split(' ')[1].split("'")[1]
         else:
             self.name = name
+
     def update(self, message):
         # start new Thread in here to handle any task
         print('\n\n {} got message "{}"'.format(self.name, message))
 
-     
+
 class Publisher:
     def __init__(self, events):
         # maps event names to subscribers
         # str -> dict
-        self.events = { event : dict()
-                          for event in events }
-                          
+        self.events = {event: dict()
+                       for event in events}
+
     def get_subscribers(self, event):
         return self.events[event]
 
     def get_events(self):
         return self.events
-                
+
     def register(self, event, subscriber):
         self.get_subscribers(event)[subscriber] = subscriber.update
-        
+
     def set_event(self, event):
         self.events[event] = dict()
 
@@ -53,13 +54,12 @@ class PubSubPattern():
     def publish(self, message):
         for s in self.subscribers:
             s.receive(message)
-            
+
     def receive(self, message):
         raise NotImplementedError
-    
+
     def subscribe(self, subscriber):
         self.subscribers.append(subscriber)
-    
 
 
 def get_arg(index, default=None):
@@ -70,5 +70,3 @@ def get_arg(index, default=None):
         return sys.argv[index]
     except IndexError:
         return default
-            
-    
