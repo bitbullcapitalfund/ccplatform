@@ -155,6 +155,6 @@ class AllMesages(gdax.WebsocketClient):
         
         
 if __name__ == "__main__":
-    f = AllMesages()
+    f = GDAXFeeder()
     f.start()
     
