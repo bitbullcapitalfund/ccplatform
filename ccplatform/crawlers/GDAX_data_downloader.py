@@ -103,9 +103,9 @@ if __name__ == "__main__":
     """
     # Variables.
     client = gdax.PublicClient()
-    product = get_arg(1, 'BTC-USD')
+    product = get_arg(1, 'ETH-USD')
     start_date = get_arg(2, '2017-06-01')
-    end_date = get_arg(3, '2017-08-04')
+    end_date = get_arg(3, '2017-08-23')
     granularity = int(get_arg(4, 1)) 
     
     # Downloading data.

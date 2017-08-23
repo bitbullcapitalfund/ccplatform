@@ -23,19 +23,18 @@ class CoinigyAccount:
         }
 
         self.calls = {
-            'activity' : 'https://api.coinigy.com/api/v1/activity',
-            'accounts' : 'https://api.coinigy.com/api/v1/accounts',
-            'balances' : 'https://api.coinigy.com/api/v1/balances',
-            'balanceHistory' : 'https://api.coinigy.com/api/v1/balanceHistory',
-            'ticker' : 'https://api.coinigy.com/api/v1/ticker',
+            'activity': 'https://api.coinigy.com/api/v1/activity',
+            'accounts': 'https://api.coinigy.com/api/v1/accounts',
+            'balances': 'https://api.coinigy.com/api/v1/balances',
+            'balanceHistory': 'https://api.coinigy.com/api/v1/balanceHistory',
+            'ticker': 'https://api.coinigy.com/api/v1/ticker',
         }
-        
-        self.auth_ids = {}
 
+        self.auth_ids = {}
 
     def call(self, name, data=None):
         if data:
-            return requests.post(self.calls[name], 
+            return requests.post(self.calls[name],
                                  headers=self.headers,
                                  data=data)
         else:
@@ -53,7 +52,6 @@ class CoinigyAccount:
         price = r['data'][0]['last_trade']
         return float(price)
 
-
     def get_altcoins_balance(self, date=None, avoid=[]):
         """
         Returns as DataFrame with the balance in USD
@@ -70,9 +68,9 @@ class CoinigyAccount:
             for i in r:
                 if i['auth_id'] not in avoid:
                     try:
-                        balances[i['balance_curr_code']] += float(i['btc_value']) * btc_price 
+                        balances[i['balance_curr_code']] += float(i['btc_value']) * btc_price
                     except KeyError:
-                        balances[i['balance_curr_code']] = float(i['btc_value']) * btc_price 
+                        balances[i['balance_curr_code']] = float(i['btc_value']) * btc_price
             return pd.DataFrame(balances, index=[date])
         # If a date is not included, it returns the complete historical data.
         else:
@@ -86,14 +84,13 @@ class CoinigyAccount:
                 date = (today - dt.timedelta(days=counter)).isoformat()
                 print('Getting data for: {}'.format(date))
                 b = self.get_altcoins_balance(date=date)
-                # Continues looping only if a balance greater than 0 
+                # Continues looping only if a balance greater than 0
                 # is returned.
                 if len(b.columns) > 0:
                     balances = pd.concat([b, balances])
                     counter += 1
                 else:
                     return balances
-            
 
     def get_total_balance(self, date=None):
         """
@@ -118,7 +115,7 @@ class CoinigyAccount:
                 date = (today - dt.timedelta(days=counter)).isoformat()
                 print('Getting data for: {}'.format(date))
                 b = self.get_total_balance(date=date)
-                # Continues looping only if a balance greater than 0 
+                # Continues looping only if a balance greater than 0
                 # is returned.
                 if b > 0:
                     self.dates.append(date)
@@ -133,16 +130,17 @@ class CoinigyAccount:
 class CoinigyAccountPlotter:
     def __init__(self, key, secret):
         self.account = CoinigyAccount(key, secret)
-    
+
     def plot_altcoins_balance(self, avoid=[]):
         balance = self.account.get_altcoins_balance(avoid=avoid)
         sns.set_style('white')
-        balance.plot(figsize=(15,12), title='Fund balance per altcoin', fontsize=16, linewidth=3)
+        balance.plot(figsize=(15, 12), title='Fund balance per altcoin', fontsize=16, linewidth=3)
+        plt.show()
 
     def plot_fund_balance(self):
         balance = self.account.get_total_balance()
         sns.set(rc={'axes.facecolor': '#A5CADD'})
-        fig = plt.figure(figsize=(15,12))
+        # fig = plt.figure(figsize=(15, 12))
         plt.plot(balance, linewidth=5, color='#961313')
         x = range(len(self.account.dates))
         plt.xticks(x, self.account.dates, fontsize=17, color='#C1726D')
@@ -153,16 +151,12 @@ class CoinigyAccountPlotter:
 
 if __name__ == "__main__":
     # Varaibles.
-    key = environ['LANDON-BITTREX-KEY']
-    secret = environ['LANDON-BITTREX-SECRET']
-    
-    # Initializations.    
+    key = environ['VIVEK-BITTREX-KEY']
+    secret = environ['VIVEK-BITTREX-SECRET']
+
+    # Initializations.
     plotter = CoinigyAccountPlotter(key, secret)
-    plotter.plot_altcoins_balance(avoid=['55245',])
+    plotter.plot_altcoins_balance(avoid=['55245', ])
     plotter.plot_fund_balance()
-    
-    
-    #Plotting.
 
-
-
+    # Plotting.

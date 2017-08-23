@@ -20,7 +20,7 @@ from core.order_book import Level3OrderBook, CumulativeOrderBook
 def animate(i):
     global order_book
     plot_flag = True
-    
+
     # Plotting.
     ask = float(order_book.current_ask)
     bid = float(order_book.current_bid)
@@ -32,8 +32,8 @@ def animate(i):
         miny = int(np.percentile(yBid, 10))
         maxy = int(np.percentile(yAsk, 90))
         minx = 0
-        maxx = int(np.percentile(xBid + xAsk , 90))
-    # Avoids raising plotting errors before any data 
+        maxx = int(np.percentile(xBid + xAsk, 90))
+    # Avoids raising plotting errors before any data
     # has been saved in the order book.
     except IndexError:
         plot_flag = False
@@ -68,9 +68,9 @@ if __name__ == '__main__':
     entry_std = float(get_arg(3, 0.5))
     exit_std = float(get_arg(4, 0.5))
     size = float(get_arg(5, 0.01))
-  
+
     # Setting client and data.
-    
+
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
     feeder = RealTimeFeeder()
@@ -80,20 +80,15 @@ if __name__ == '__main__':
     feeder.subscribe(order_book)
     order_book.subscribe(strategy)
     strategy.subscribe(trader)
-    
-    
+
     # Trade.
     feeder.start()
     print('Connected and waiting for data')
-    
+
     # Figure
     fig = plt.figure()
-    ax1 = fig.add_subplot(1,1,1)
-    
+    ax1 = fig.add_subplot(1, 1, 1)
+
     # Updating plot.
     ani = animation.FuncAnimation(fig, animate, interval=300)
     plt.show()
-    
-    
-    
-    
