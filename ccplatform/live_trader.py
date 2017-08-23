@@ -8,11 +8,11 @@ Created on Mon Jun 26 15:23:10 2017
 import sys
 import os
 import gdax
+import models
 
 from data_feeder import GDAXFeeder
-import models
 from trader import Trader
-from mongo_handler import MyMongoClient 
+from mongo_handler import MyMongoClient
 
 
 def get_arg(index, default):
@@ -24,12 +24,12 @@ def get_arg(index, default):
 
 if __name__ == '__main__':
     # Settig variables.
-#    key = 'c2c736241299f78327809504d2ffb0e7'
-#    secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
-#    passphrase = 'si3b5hm7609'
+    # key = 'c2c736241299f78327809504d2ffb0e7'
+    # secret = 'xzYSvcKvfP8Nx1uS+FxK7yWtoSfJplenN0vv9zGywfQcjTqEfqTmvGWsGixSQHCtkh9JdNoncEU1rEL1MXDWkA=='
+    # passphrase = 'si3b5hm7609'
     key = '9116261f62d68797d0d81a58a7b52936'
     secret = 'ccJBCbwaivcElWTA0g4n5pKmKCSpzYeE7Lac0cx4NuKfFn9BW0jOlZm76nLR3v90DmiUh4AjEp2vzw9uMeg49g=='
-    passphrase = 'znp4ddpgxmb'        
+    passphrase = 'znp4ddpgxmb'
     product = get_arg(1, 'BTC-USD')
     startDate = '2017-06-19'
     endDate = '2017-06-26'
@@ -37,17 +37,16 @@ if __name__ == '__main__':
     entry_std = float(get_arg(3, 0.5))
     exit_std = float(get_arg(4, 0.5))
     size = float(get_arg(5, 0.01))
-  
-    # Setting client and data.
-#    data = pd.read_csv('BTC-USD_20170619-20170626.csv', index_col=0)
 
-    
+    # Setting client and data.
+    # data = pd.read_csv('BTC-USD_20170619-20170626.csv', index_col=0)
+
     # Initializing objects.
     client = gdax.AuthenticatedClient(key, secret, passphrase)
     strategy = models.BayesianStrategy()
     feeder = GDAXFeeder()
     trader = Trader(client, product=product, size=0.01)
-    
+
     # Initializing database.
     try:
         db_user = 'Writeuser'
@@ -56,16 +55,12 @@ if __name__ == '__main__':
     except KeyError:
         host = 'localhost'
     db = MyMongoClient('cc_trades', strategy.name, host=host)
-    
+
     # Subscribing.
     feeder.pub.register('gdax_data', strategy)
     strategy.pub.register('signals', trader)
     strategy.pub.register('signals', db)
-    
+
     # Backtest.
 #    feeder.start()
     print('Connected and waiting for data')
-    
-    
-    
-    

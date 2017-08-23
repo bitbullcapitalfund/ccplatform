@@ -7,9 +7,9 @@ Created on Thu Jul 20 16:24:22 2017
 
 import sys
 import os
+
 from data_feeder import GDAXFeeder
 from mongo_handler import MyMongoClient
-
 
 
 def get_arg(index, default):
@@ -26,9 +26,9 @@ if __name__ == '__main__':
     passphrase = ''
     product = get_arg(1, 'BTC-USD')
     collection_name = 'gdax_' + product
-      
+
     # Initializing objects.
-#    client = gdax.AuthenticatedClient(key, secret, passphrase)
+    # client = gdax.AuthenticatedClient(key, secret, passphrase)
     feeder = GDAXFeeder()
     try:
         db_user = 'Writeuser'
@@ -38,8 +38,7 @@ if __name__ == '__main__':
         host = 'localhost'
     db = MyMongoClient('cc_data', collection_name, host=host)
     feeder.pub.register('gdax_data', db)
-    
+
     # Trade.
     feeder.start()
     print('Connected and waiting for data')
-    

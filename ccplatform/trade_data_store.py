@@ -20,7 +20,7 @@ def get_arg(index, default):
 
 
 if __name__ == "__main__":
-	# Variables.
+    # Variables.
     key = "67a4cf6b2800fb2a177693a61bff2b1a"
     secret = "8f756b95e898a8e42bbed7b0abb858d5"
     channel = get_arg(1, 'TRADE-GDAX--BTC--USD')
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Setting database and subscriptions.
     db = MyMongoClient(db_name, collection_name=channel)
     ws.pub.register(channel, db)
-        
+
     # Start connection.
     connnectThread.start()
     print('\nWaiting for connection')
