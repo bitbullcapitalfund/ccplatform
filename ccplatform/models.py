@@ -210,8 +210,8 @@ class BayesianStrategy(Strategy):
         self.data = []
         self.regression_model = joblib.load("trained_models/regression_model1.pkl")
         self.params = pickle.load(open("trained_models/params_regression1.pkl", 'rb'))
-        self.buy_limit = self.params['buy_limit']
-        self.sell_limit = self.params['sell_limit']
+        self.buy_limit = float(self.params['buy_limit'])
+        self.sell_limit = float(self.params['sell_limit'])
         self.lag = len(self.regression_model.coef_) - 2
 
     def update(self, msg):
