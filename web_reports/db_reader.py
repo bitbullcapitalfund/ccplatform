@@ -7,14 +7,13 @@ Created on Wed Aug 16 08:33:47 2017
 
 import os
 import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-
 import datetime as dt
 import pandas as pd
 import seaborn as sns
 import json
-from pprint import pprint
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
+from pprint import pprint
 from ccplatform.common import get_arg
 from ccplatform.mongo_handler import MyMongoClient
 from account import CoinigyAccount

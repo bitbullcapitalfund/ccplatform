@@ -8,14 +8,13 @@ Created on Wed Aug 16 07:38:26 2017
 
 import os
 import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-
 import datetime as dt
 import json
 import requests
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 from pprint import pprint
 from time import sleep
-
 from ccplatform.common import get_arg
 from ccplatform.mongo_handler import MyMongoClient
 from account import CoinigyAccount
