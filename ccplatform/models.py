@@ -40,7 +40,16 @@ class Strategy(Subscriber):
         self.prediction(_time, price, _type)
 
     def prediction(self, _time, price, _type):
-        self.pub.dispatch('signals', (_time, price, _type))
+        self.send_signal('signals', (_time, price, _type))
+
+    def send_signal(self, msg):
+    	"""
+    	This method is used to send the buy or close signal to the exchange.
+    	"""
+    	# Updating the state of the account.
+    	self.accountState = 'BUY' if msg[1] is 'BUY' else 'CLOSE'
+    	# Publishing signal.
+    	self.pub.dispatch('signals', msg)
 
     def update(self, msg):
         """
@@ -90,7 +99,7 @@ class DeviationStrategy(Strategy):
                 lowStd = mean - self.entryStd * std
                 print('Ask Std Dev: {} - {}'.format(lowStd, price))
                 if price < lowStd:
-                    self.pub.dispatch((_time, 'BUY', price))
+                    self.send_signal((_time, 'BUY', price))
             elif (len(self.ask) < self.period) and (_type == 'ask'):
                 print("Collecting initial data: {}/{}".format(len(self.ask),
                                                               self.period))
@@ -103,7 +112,7 @@ class DeviationStrategy(Strategy):
                 highStd = mean + self.exitStd * std
                 print('Bid Std Dev: {} - {}'.format(highStd, price))
                 if (price > highStd) & (self.accountState == 'BUY'):
-                    self.pub.dispatch((_time, 'CLOSE', price))
+                    self.send_signal((_time, 'CLOSE', price))
 
 
 class MA30N5Strategy(Strategy):
@@ -157,9 +166,9 @@ class MA30N5Strategy(Strategy):
             result = "CLOSE"
 
         if (result == 'CLOSE') and (self.accountState == 'BUY'):
-            self.pub.dispatch((_time, result, price))
+            self.send_signal((_time, result, price))
         if (result == 'BUY') and (self.accountState == 'CLOSE'):
-            self.pub.dispatch((_time, result, price))
+            self.send_signal((_time, result, price))
 
     def normalize_data(self):
         """
@@ -250,8 +259,8 @@ class BayesianStrategy(Strategy):
 
         if ((result == 'CLOSE') and (self.accountState == 'BUY') and (_type == 'ask')) or ((result == 'BUY') and (self.accountState == 'CLOSE') and _type == 'bid'):
             print('\n\nPlacing a trade\n\n')
-            self.pub.dispatch((_time, result, price))
-            self.newTrade.append(1)
+            self.send_signal((_time, result, price))
+            self.newTrade.append(1)  # For testing purposes.
 
     def json_parse(self, json_string):
         """

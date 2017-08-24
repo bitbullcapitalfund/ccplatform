@@ -25,13 +25,13 @@ A. Creating a new strategy.
 				if float(price) >= 3000:
 					print(price)
 
-	4- Send signals to the exchange calling the self.pub.dispatch() method. This method receives a tuple that has this format (time, type, price). 'time' is a datetime object, type is a string containin 'BUY' or 'CLOSE' and price is a string containing the desired price of the order.
+	4- Send signals to the exchange calling the self.send_signal() method. This method receives a tuple that has this format (time, type, price). 'time' is a datetime object, type is a string containin 'BUY' or 'CLOSE' and price is a string containing the desired price of the order.
 		Example:
 
 		class ToyStrategy(Strategy):
 			def calculate(self, _time, price, _type): 	
 				if float(price) >= 3000:
-					self.pub.dispatch((_time, 'BUY', 3000.00))
+					self.send_signal((_time, 'BUY', 3000.00))
 
 	5- You can check the attribute 'self.accountState' to know if you are in or out of the market. This attribute can have two states: 'CLOSE' (out of the market) or 'BUY' (in the market).
 		Example:
