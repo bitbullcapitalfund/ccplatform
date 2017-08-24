@@ -208,14 +208,10 @@ class BayesianStrategy(Strategy):
     def __init__(self):
         super().__init__()
         self.data = []
-        # self.basemodel1 = joblib.load("trained_models/base_model1.pkl")
-        # self.basemodel2 = joblib.load("trained_models/base_model2.pkl")
-        # self.basemodel3 = joblib.load("trained_models/base_model3.pkl")
-        # self.mainmodel = joblib.load("trained_models/main_model.pkl")
         self.regression_model = joblib.load("trained_models/regression_model1.pkl")
         self.params = pickle.load(open("trained_models/params_regression1.pkl", 'rb'))
-        self.buy_limit = self.params['buy_limit']
-        self.sell_limit = self.params['sell_limit']
+        self.buy_limit = float(self.params['buy_limit'])
+        self.sell_limit = float(self.params['sell_limit'])
         self.lag = len(self.regression_model.coef_) - 2
         self.newTrade = []
 
@@ -225,7 +221,6 @@ class BayesianStrategy(Strategy):
         if _transaction == "match":
             if len(self.data) == self.lag:
                 self.prediction(_time, _price, _volume, _type)
-                self.data = self.data[1:]
             else:
                 self.data.insert(0, _price)
 
@@ -236,17 +231,22 @@ class BayesianStrategy(Strategy):
         """
         print('Predicting...')
         try:
-            # pred1 = self.basemodel1.predict(np.array(self.data))
-            # pred2 = self.basemodel2.predict(np.array(self.data[:128]))
-            # pred3 = self.basemodel3.predict(np.array(self.data[:64]))
-            # pred = self.mainmodel.predict(np.array([volume, price, pred1, pred2, pred3]))
-            pred = self.regression_model.predict(self.data)
+            test = self.data.copy()
+            test.insert(0,volume)
+            test.insert(0,price)
+            test = np.array(test).reshape(1,-1)
+            pred = self.regression_model.predict(self.test)[0]
             if pred >= self.buy_limit:
                 result = 'BUY'
-            if pred <= self.sell_limit:
+            elif pred <= self.sell_limit:
                 result = 'CLOSE'
+            else:
+                result = 'HOLD'
         except:
             result = 'CLOSE'
+
+        self.data.insert(0,price)
+        self.data = self.data[:-1]
 
         if ((result == 'CLOSE') and (self.accountState == 'BUY') and (_type == 'ask')) or ((result == 'BUY') and (self.accountState == 'CLOSE') and _type == 'bid'):
             print('\n\nPlacing a trade\n\n')
