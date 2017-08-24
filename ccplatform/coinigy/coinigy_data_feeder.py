@@ -10,11 +10,12 @@ import sys
 import logging
 import json
 
+# Update Python Path to be able to load custom modules. Do not change line position.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+
 from socketclusterclient import Socketcluster
 from ccplatform.coinigy.pub_sub import Publisher, Subscriber
 from ccplatform.coinigy.websocket_thread import ConnectThread
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 
 
 class CoinigyWebsocket():
